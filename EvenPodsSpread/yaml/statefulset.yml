@@ -1,0 +1,39 @@
+# https://rancher.com/blog/2019/2019-01-29-what-is-pause/
+apiVersion: v1
+kind: Service
+metadata:
+  name: pause
+spec:
+  clusterIP: None
+  selector:
+    app: pause
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pause
+  labels:
+    app: pause
+spec:
+  # podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: pause
+  serviceName: pause
+  replicas: 3
+  template:
+    metadata:
+      name: pause
+      labels:
+        app: pause
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: zone
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: pause
+      containers:
+      - name: pause
+        image: lenhattan86/pause:3.1
